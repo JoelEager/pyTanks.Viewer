@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>WebSocket client</title>
+	</head>
+	<body>
+		<script>
+			var ws = new WebSocket("ws://127.0.0.1:5678/");
+			var messages = document.createElement('ul');
+			
+			ws.onmessage = function (event) {
+				var message = document.createElement('li');
+				var content = document.createTextNode(event.data);
+				message.appendChild(content);
+				messages.appendChild(message);
+			};
+			
+			document.body.appendChild(messages);
+		</script>
+		<p>
+			<button onclick="ws.send('Hello!');">Send message</button>
+		</p>
+	</body>
+</html>
