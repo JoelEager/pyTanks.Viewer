@@ -4,21 +4,55 @@
 		<title>WebSocket client</title>
 	</head>
 	<body>
+		<center>
+			<canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;">Please upgrade your browser.</canvas>
+			<br />
+			<button onclick="ws.send('change_heading');">change_heading</button>
+		</center>
 		<script>
+			// Client configuration - must match server's settings
+			var config = {
+				framesPerSecond: 60,	// FPS to run the simulation at
+				mapSize: {				// Size of the map (must be the same as the canvas size)
+					x: 500,
+					y: 500
+				},
+				tankSpeed: 25			// Tank speed in pixels per second
+			}
+		
 			var ws = new WebSocket("ws://127.0.0.1:5678/viewerAPI");
-			var messages = document.createElement('ul');
+			var myDrawer = document.getElementById("canvas").getContext("2d");
+			var gameState = null;
+			var newGameState = null;
 			
 			ws.onmessage = function (event) {
-				var message = document.createElement('li');
-				var content = document.createTextNode(event.data);
-				message.appendChild(content);
-				messages.appendChild(message);
+				newGameState = JSON.parse(event.data);
 			};
 			
-			document.body.appendChild(messages);
+			function doTick() {
+				// Return if no data from the server has arrived yet
+				if (gameState == null && newGameState == null) {
+					return
+				}
+				
+				if (newGameState == null) {
+					// Extrapolate if there isn't an update from the server
+					var totalDistance = config.tankSpeed * (1 / config.framesPerSecond);
+					gameState.x += Math.cos(gameState.heading) * totalDistance;
+					gameState.y += Math.sin(gameState.heading) * totalDistance;
+				} else {
+					// Apply the update from the server
+					gameState = newGameState;
+					newGameState = null;
+				}
+				
+				// Render based on that game state
+				myDrawer.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
+				myDrawer.fillStyle = "Black";
+				myDrawer.fillRect(gameState.x - 5, gameState.y - 5, 10, 10);
+			}
+			
+			window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
 		</script>
-		<p>
-			<button onclick="ws.send('Hello!');">Send message</button>
-		</p>
 	</body>
 </html>
