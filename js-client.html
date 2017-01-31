@@ -20,7 +20,7 @@
 				tankSpeed: 25			// Tank speed in pixels per second
 			}
 		
-			var ws = new WebSocket("ws://127.0.0.1:5678/viewerAPI");
+			var ws = new WebSocket("ws://127.0.0.1:5678/pyTanksAPI/viewer");
 			var myDrawer = document.getElementById("canvas").getContext("2d");
 			var gameState = null;
 			var newGameState = null;
