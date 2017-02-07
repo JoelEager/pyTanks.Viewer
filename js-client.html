@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>WebSocket client</title>
+		<title>pyTanks Viewer</title>
 	</head>
 	<body>
 		<center>
 			<canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;">Please upgrade your browser.</canvas>
-			<br />
-			<button onclick="ws.send('change_heading');">change_heading</button>
 		</center>
 		<script>
 			// Client configuration - must match server's settings
@@ -38,8 +36,12 @@
 				if (newGameState == null) {
 					// Extrapolate if there isn't an update from the server
 					var totalDistance = config.tankSpeed * (1 / config.framesPerSecond);
-					gameState.x += Math.cos(gameState.heading) * totalDistance;
-					gameState.y += Math.sin(gameState.heading) * totalDistance;
+					for (tank of gameState.tanks) {
+						if (tank.moving) {
+							tank.x += Math.cos(tank.heading) * totalDistance;
+							tank.y += Math.sin(tank.heading) * totalDistance;
+						}
+					}
 				} else {
 					// Apply the update from the server
 					gameState = newGameState;
@@ -49,7 +51,9 @@
 				// Render based on that game state
 				myDrawer.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
 				myDrawer.fillStyle = "Black";
-				myDrawer.fillRect(gameState.x - 5, gameState.y - 5, 10, 10);
+				for (tank of gameState.tanks) {
+					myDrawer.fillRect(tank.x - 5, tank.y - 5, 10, 10);
+				}
 			}
 			
 			window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
