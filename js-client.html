@@ -27,10 +27,11 @@
 			// Globals
 			var gameState = null;
 			var gameStateUpdate = null;
+			var canvas = null;
 			
 			// Setup and run the viewer
 			$(function() {
-				var canvasContext = $("#canvas")[0].getContext("2d");
+				canvas = $("#canvas")[0].getContext("2d");
 				var status = $("#status");
 				
 				// Connect to sever
@@ -41,7 +42,7 @@
 					status.html("Connected.");
 					
 					// Start the doTick clock
-					var ticker = window.setInterval(function(){ doTick(canvasContext); }, 1000 / config.framesPerSecond);
+					var ticker = window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
 				
 					// Store any incoming gameState updates
 					socket.onmessage = function (event) {
@@ -62,7 +63,7 @@
 			});
 			
 			// Calculates and renders one frame
-			function doTick(canvasContext) {
+			function doTick() {
 				// Return if no data from the server has arrived yet
 				if (gameState == null && gameStateUpdate == null) {
 					return;
@@ -90,15 +91,24 @@
 				}
 				
 				// Render based on that game state
-				canvasContext.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
-				canvasContext.fillStyle = "Black";
+				canvas.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
+				canvas.fillStyle = "Black";
 				for (tank of gameState.tanks) {
-					canvasContext.fillRect(tank.x, tank.y, 10, 10);
+					drawRotatedRect(tank.x, tank.y, 10, 10, tank.heading);
 				}
-				canvasContext.fillStyle = "Red";
+				canvas.fillStyle = "Red";
 				for (shell of gameState.shells) {
-					canvasContext.fillRect(shell.x, shell.y, 4, 4);
+					drawRotatedRect(shell.x, shell.y, 4, 4, shell.heading);
 				}
+			}
+			
+			function drawRotatedRect(x, y, width, height, heading) {
+				canvas.save();
+				canvas.translate(x + width / 2, y + height / 2);
+				canvas.rotate(heading);
+				// Note: after transforming [0,0] is visually [x,y] so the rect needs to be offset accordingly when drawn
+				canvas.fillRect(-width / 2, -height / 2, width, height);
+				canvas.restore();
 			}
 		</script>
 	</body>
