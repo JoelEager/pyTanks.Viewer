@@ -1,115 +1,115 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>pyTanks Viewer</title>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-	</head>
-	<body>
-		<center>
-			<canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
-			<p><small id="status">Connecting...</small></p>
-		</center>
-		<script>
-			// Client configuration - must match server's settings
-			var config = {
-				framesPerSecond: 60,			// FPS to run the simulation at
-				mapSize: {						// Size of the map (must be the same as the canvas size)
-					x: 500,
-					y: 500
-				},
-				tankSpeed: 25,					// Tank speed in pixels per second
-				shellSpeed: 100,				// Shell speed in pixels per second
-				serverIP: "localhost",			// Server's IP
-				serverPort: "9042",				// Server's port
-				apiPath: "/pyTanksAPI/viewer"	// API path on the server to connect to
-			};
-			
-			// Globals
-			var gameState = null;
-			var gameStateUpdate = null;
-			var canvas = null;
-			
-			// Setup and run the viewer
-			$(function() {
-				canvas = $("#canvas")[0].getContext("2d");
-				var status = $("#status");
-				
-				// Connect to sever
-				var socket = new WebSocket("ws://" + config.serverIP + ":" + config.serverPort + config.apiPath);
-				
-				// Finish setup on successful connect
-				socket.onopen = function (event) {
-					status.html("Connected.");
-					
-					// Start the doTick clock
-					var ticker = window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
-				
-					// Store any incoming gameState updates
-					socket.onmessage = function (event) {
-						gameStateUpdate = JSON.parse(event.data);
-					};
-					
-					// Handle a disconnect
-					socket.onclose = function (event) {
-						window.clearInterval(ticker);
-						status.html("Lost connection.");
-					};
-				};
-			
-				// Handle errors in connecting
-				socket.onerror = function (event) {
-					status.html("Failed to connect.");
-				};
-			});
-			
-			// Calculates and renders one frame
-			function doTick() {
-				// Return if no data from the server has arrived yet
-				if (gameState == null && gameStateUpdate == null) {
-					return;
-				}
-				
-				if (gameStateUpdate == null) {
-					// Extrapolate if there isn't an update from the server
-					var totalDistance = config.tankSpeed * (1 / config.framesPerSecond);
-					for (tank of gameState.tanks) {
-						if (tank.moving) {
-							tank.x += Math.cos(tank.heading) * totalDistance;
-							tank.y += Math.sin(tank.heading) * totalDistance;
-						}
-					}
-					
-					totalDistance = config.shellSpeed * (1 / config.framesPerSecond);
-					for (shell of gameState.shells) {
-						shell.x += Math.cos(shell.heading) * totalDistance;
-						shell.y += Math.sin(shell.heading) * totalDistance;
-					}
-				} else {
-					// Apply the update from the server
-					gameState = gameStateUpdate;
-					gameStateUpdate = null;
-				}
-				
-				// Render based on that game state
-				canvas.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
-				canvas.fillStyle = "Black";
-				for (tank of gameState.tanks) {
-					drawRotatedRect(tank.x, tank.y, 10, 10, tank.heading);
-				}
-				canvas.fillStyle = "Red";
-				for (shell of gameState.shells) {
-					drawRotatedRect(shell.x, shell.y, 4, 4, shell.heading);
-				}
-			}
-			
-			function drawRotatedRect(x, y, width, height, heading) {
-				canvas.save();
-				canvas.translate(x + width / 2, y + height / 2);
-				canvas.rotate(heading);
-				// Note: after transforming [0,0] is visually [x,y] so the rect needs to be offset accordingly when drawn
-				canvas.fillRect(-width / 2, -height / 2, width, height);
-				canvas.restore();
-			}
-		</script>
-	</body>
+    <head>
+        <title>pyTanks Viewer</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <center>
+            <canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
+            <p><small id="status">Connecting...</small></p>
+        </center>
+        <script>
+            // Client configuration - must match server's settings
+            var config = {
+                framesPerSecond: 60,            // FPS to run the simulation at
+                mapSize: {                      // Size of the map (must be the same as the canvas size)
+                    x: 500,
+                    y: 500
+                },
+                tankSpeed: 25,                  // Tank speed in pixels per second
+                shellSpeed: 100,                // Shell speed in pixels per second
+                serverIP: "localhost",          // Server's IP
+                serverPort: "9042",             // Server's port
+                apiPath: "/pyTanksAPI/viewer"   // API path on the server to connect to
+            };
+            
+            // Globals
+            var gameState = null;
+            var gameStateUpdate = null;
+            var canvas = null;
+            
+            // Setup and run the viewer
+            $(function() {
+                canvas = $("#canvas")[0].getContext("2d");
+                var status = $("#status");
+                
+                // Connect to sever
+                var socket = new WebSocket("ws://" + config.serverIP + ":" + config.serverPort + config.apiPath);
+                
+                // Finish setup on successful connect
+                socket.onopen = function (event) {
+                    status.html("Connected.");
+                    
+                    // Start the doTick clock
+                    var ticker = window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
+                
+                    // Store any incoming gameState updates
+                    socket.onmessage = function (event) {
+                        gameStateUpdate = JSON.parse(event.data);
+                    };
+                    
+                    // Handle a disconnect
+                    socket.onclose = function (event) {
+                        window.clearInterval(ticker);
+                        status.html("Lost connection.");
+                    };
+                };
+            
+                // Handle errors in connecting
+                socket.onerror = function (event) {
+                    status.html("Failed to connect.");
+                };
+            });
+            
+            // Calculates and renders one frame
+            function doTick() {
+                // Return if no data from the server has arrived yet
+                if (gameState == null && gameStateUpdate == null) {
+                    return;
+                }
+                
+                if (gameStateUpdate == null) {
+                    // Extrapolate if there isn't an update from the server
+                    var totalDistance = config.tankSpeed * (1 / config.framesPerSecond);
+                    for (tank of gameState.tanks) {
+                        if (tank.moving) {
+                            tank.x += Math.cos(tank.heading) * totalDistance;
+                            tank.y += Math.sin(tank.heading) * totalDistance;
+                        }
+                    }
+                    
+                    totalDistance = config.shellSpeed * (1 / config.framesPerSecond);
+                    for (shell of gameState.shells) {
+                        shell.x += Math.cos(shell.heading) * totalDistance;
+                        shell.y += Math.sin(shell.heading) * totalDistance;
+                    }
+                } else {
+                    // Apply the update from the server
+                    gameState = gameStateUpdate;
+                    gameStateUpdate = null;
+                }
+                
+                // Render based on that game state
+                canvas.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
+                canvas.fillStyle = "Black";
+                for (tank of gameState.tanks) {
+                    drawRotatedRect(tank.x, tank.y, 10, 10, tank.heading);
+                }
+                canvas.fillStyle = "Red";
+                for (shell of gameState.shells) {
+                    drawRotatedRect(shell.x, shell.y, 4, 4, shell.heading);
+                }
+            }
+            
+            function drawRotatedRect(x, y, width, height, heading) {
+                canvas.save();
+                canvas.translate(x + width / 2, y + height / 2);
+                canvas.rotate(heading);
+                // Note: after transforming [0,0] is visually [x,y] so the rect needs to be offset accordingly when drawn
+                canvas.fillRect(-width / 2, -height / 2, width, height);
+                canvas.restore();
+            }
+        </script>
+    </body>
 </html>
