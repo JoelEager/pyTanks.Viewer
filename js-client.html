@@ -92,8 +92,14 @@
                 
                 // Render based on that game state
                 canvas.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
-                canvas.fillStyle = "Black";
+                
                 for (tank of gameState.tanks) {
+                    if (tank.alive) {
+                        canvas.fillStyle = "Black";
+                    } else {
+                        canvas.fillStyle = "Orange";
+                    }
+                    
                     drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
                 }
                 canvas.fillStyle = "Red";
