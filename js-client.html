@@ -7,7 +7,7 @@
     <body>
         <center>
             <canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
-            <p><small id="status">Connecting...</small></p>
+            <p><small id="clientStatus">Connecting...</small></p>
         </center>
         <script>
             // Client configuration - must match server's settings
@@ -28,18 +28,19 @@
             var gameState = null;
             var gameStateUpdate = null;
             var canvas = null;
+            var clientStatus = null;
             
             // Setup and run the viewer
             $(function() {
                 canvas = $("#canvas")[0].getContext("2d");
-                var status = $("#status");
+                clientStatus = $("#clientStatus");
                 
                 // Connect to sever
                 var socket = new WebSocket("ws://" + config.serverIP + ":" + config.serverPort + config.apiPath);
                 
                 // Finish setup on successful connect
                 socket.onopen = function (event) {
-                    status.html("Connected.");
+                    clientStatus.html("Connected");
                     
                     // Start the doTick clock
                     var ticker = window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
@@ -52,13 +53,13 @@
                     // Handle a disconnect
                     socket.onclose = function (event) {
                         window.clearInterval(ticker);
-                        status.html("Lost connection.");
+                        clientStatus.html("Lost connection");
                     };
                 };
             
                 // Handle errors in connecting
                 socket.onerror = function (event) {
-                    status.html("Failed to connect.");
+                    clientStatus.html("Failed to connect");
                 };
             });
             
@@ -88,23 +89,32 @@
                     // Apply the update from the server
                     gameState = gameStateUpdate;
                     gameStateUpdate = null;
+                    
+                    if (gameState.ongoingGame) {
+                        clientStatus.html("Connected - Game in progress");
+                    } else {
+                        clientStatus.html("Connected - Waiting for players");
+                    }
                 }
                 
                 // Render based on that game state
                 canvas.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
                 
-                for (tank of gameState.tanks) {
-                    if (tank.alive) {
-                        canvas.fillStyle = "Black";
-                    } else {
-                        canvas.fillStyle = "Orange";
+                if (gameState.ongoingGame) {
+                    for (tank of gameState.tanks) {
+                        if (tank.alive) {
+                            canvas.fillStyle = "Black";
+                        } else {
+                            canvas.fillStyle = "Orange";
+                        }
+                        
+                        drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
                     }
                     
-                    drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
-                }
-                canvas.fillStyle = "Red";
-                for (shell of gameState.shells) {
-                    drawRotatedRect(shell.x - 1, shell.y - 1, 3, 3, shell.heading);
+                    canvas.fillStyle = "Red";
+                    for (shell of gameState.shells) {
+                        drawRotatedRect(shell.x - 1, shell.y - 1, 3, 3, shell.heading);
+                    }
                 }
             }
             
