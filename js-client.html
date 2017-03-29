@@ -2,13 +2,19 @@
 <html>
     <head>
         <title>pyTanks Viewer</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <style>
+            td {
+                padding: 3px;
+            }
+        </style>
     </head>
     <body>
         <center>
-            <canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
             <p><small id="clientStatus">Connecting...</small></p>
+            <canvas id="canvas" width="500" height="500" style="border: 1px solid #d3d3d3;"></canvas>
+            <table id="scoreboard" style="margin-left: 25px; border: 1px solid #d3d3d3; position: absolute; top: 5px; right: 5px;"></table>
         </center>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script>
             // Client configuration - must match server's settings
             var config = {
@@ -29,11 +35,13 @@
             var gameStateUpdate = null;
             var canvas = null;
             var clientStatus = null;
+            var scoreboard = null;
             
             // Setup and run the viewer
             $(function() {
                 canvas = $("#canvas")[0].getContext("2d");
                 clientStatus = $("#clientStatus");
+                scoreboard = $("#scoreboard");
                 
                 // Connect to sever
                 var socket = new WebSocket("ws://" + config.serverIP + ":" + config.serverPort + config.apiPath);
@@ -94,6 +102,22 @@
                         clientStatus.html("Connected - Game in progress");
                     } else {
                         clientStatus.html("Connected - Waiting for players");
+                    }
+                    
+                    var scoreHTML = "<tr><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>";
+                    for (tank of gameState.tanks) {
+                        scoreHTML += "<tr><td>";
+                        
+                        if (tank.alive) {
+                            scoreHTML += "A";
+                        } else {
+                            scoreHTML += "D";
+                        }
+                        
+                        scoreHTML += "</td><td>" + tank.name + "</td><td>" + tank.kills + "</td><td>" + tank.wins + "</td></tr>";
+                    }
+                    if (scoreboard.html() != scoreHTML) {
+                        scoreboard.html(scoreHTML);
                     }
                 }
                 
