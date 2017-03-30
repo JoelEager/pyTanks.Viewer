@@ -84,14 +84,14 @@
                     for (tank of gameState.tanks) {
                         if (tank.moving) {
                             tank.x += Math.cos(tank.heading) * totalDistance;
-                            tank.y += Math.sin(tank.heading) * totalDistance;
+                            tank.y -= Math.sin(tank.heading) * totalDistance;
                         }
                     }
                     
                     totalDistance = config.shellSpeed * (1 / config.framesPerSecond);
                     for (shell of gameState.shells) {
                         shell.x += Math.cos(shell.heading) * totalDistance;
-                        shell.y += Math.sin(shell.heading) * totalDistance;
+                        shell.y -= Math.sin(shell.heading) * totalDistance;
                     }
                 } else {
                     // Apply the update from the server
