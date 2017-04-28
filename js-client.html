@@ -134,6 +134,23 @@
                     gameState = gameStateUpdate;
                     gameStateUpdate = null;
                     
+                    // Sort the tanks
+                    gameState.tanks.sort(function(tank1, tank2) {
+                        // lower = first on the list
+                        var weight1 = -1 * tank1.wins;
+                        var weight2 = -1 * tank2.wins;
+                        
+                        if (tank1.alive) {
+                            weight1 -= 100;
+                        }
+                        if (tank2.alive) {
+                            weight2 -= 100;
+                        }
+                        
+                        return weight1 - weight2;
+                    });
+                    
+                    // Update the status
                     if (gameState.ongoingGame) {
                         clientStatus.html("Connected - Game in progress");
                     } else {
