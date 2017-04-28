@@ -9,12 +9,15 @@
         </style>
     </head>
     <body>
-        <h2>pyTanks Viewer</h2>
-        <p>For more information on pyTanks <a href="https://github.com/JoelEager/pyTanks.Viewer" target="_blank">click here</a>.<p>
+        <h2 style="margin: 0px;">pyTanks Viewer</h2>
+        <p style="margin-top: 5px;">For more information on pyTanks <a href="https://github.com/JoelEager/pyTanks.Viewer" target="_blank">click here</a>.</p>
         <div style="text-align: center;">
             <p id="clientStatus">Connecting...</p>
             <canvas id="canvas" width="500" height="500" style="display: inline-block; border: 1px solid #d3d3d3; vertical-align: top; margin-bottom: 10px;"></canvas>
-            <table id="scoreboard" style="text-align: left; display: inline-block; border: 1px solid #d3d3d3;"></table>
+            <div style="display: inline-block; border: 1px solid #d3d3d3;">
+                <table id="scoreboard" style="text-align: left;"></table>
+                A = alive, D = dead
+            </div>
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script>
@@ -103,7 +106,7 @@
                     if (gameState.ongoingGame) {
                         clientStatus.html("Connected - Game in progress");
                     } else {
-                        clientStatus.html("Connected - Waiting for players<p>Why don't you spin up a couple more?</p>");
+                        clientStatus.html("Connected - Waiting for players. (Feel free to connect a couple more to get a game started.)");
                     }
                     
                     var scoreHTML = "<tr><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>";
