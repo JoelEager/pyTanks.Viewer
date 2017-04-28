@@ -6,6 +6,10 @@
             td {
                 padding: 3px;
             }
+            
+            tr:hover:not(.header) {
+                color: cadetblue;
+            }
         </style>
     </head>
     <body>
@@ -15,8 +19,13 @@
             <p id="clientStatus">Connecting...</p>
             <canvas id="canvas" width="500" height="500" style="display: inline-block; border: 1px solid #d3d3d3; vertical-align: top; margin-bottom: 10px;"></canvas>
             <div style="display: inline-block; border: 1px solid #d3d3d3;">
-                <table id="scoreboard" style="text-align: left;"></table>
-                A = alive, D = dead
+                <table id="scoreboard" style="text-align: left;">
+                    <tr class="header"><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>
+                </table>
+                <div style="margin: 5px;">
+                    A = alive, D = dead. <br />
+                    Hover over a tank above to see it highlighted on the map.
+                </div>
             </div>
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -30,23 +39,45 @@
                 },
                 tankSpeed: 30,                  // Tank speed in pixels per second
                 shellSpeed: 150,                // Shell speed in pixels per second
+                maxPlayers: 15,                 // Maximum number of connected players
                 serverIP: "localhost",          // Server's IP
                 serverPort: "9042",             // Server's port
                 apiPath: "/pyTanksAPI/viewer"   // API path on the server to connect to
             };
+            
+            // Colors used for rendering the canvas
+            var colors = {
+                selectedTank: "cadetblue",
+                deadTank: "orange",
+                aliveTank: "black",
+                shell: "red",
+                wall: "gray"
+            }
             
             // Globals
             var gameState = null;
             var gameStateUpdate = null;
             var canvas = null;
             var clientStatus = null;
-            var scoreboard = null;
+            var scoreboardRows = [];
+            var selectedTank = -1;
             
             // Setup and run the viewer
             $(function() {
                 canvas = $("#canvas")[0].getContext("2d");
                 clientStatus = $("#clientStatus");
-                scoreboard = $("#scoreboard");
+                
+                // Setup the scoreboard
+                var scoreboard = $("#scoreboard");
+                for (var count = 0; count < config.maxPlayers; count++) {
+                    var aRow = $(
+                        "<tr id='score-" + count + "' " +
+                        "onmouseenter='selectedTank = " + count + ";' onmouseleave='selectedTank = -1;'>" + 
+                        "<td>&nbsp;</td></tr>");
+                    
+                    scoreboard.append(aRow);
+                    scoreboardRows.push(aRow);
+                }
                 
                 // Connect to sever
                 var socket = new WebSocket("ws://" + config.serverIP + ":" + config.serverPort + config.apiPath);
@@ -109,20 +140,28 @@
                         clientStatus.html("Connected - Waiting for players. (Feel free to connect a couple more to get a game started.)");
                     }
                     
-                    var scoreHTML = "<tr><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>";
-                    for (tank of gameState.tanks) {
-                        scoreHTML += "<tr><td>";
+                    // Update any out of date scoreboard entries
+                    for (var count = 0; count < config.maxPlayers; count++) {
+                        var scoreHTML = "";
                         
-                        if (tank.alive) {
-                            scoreHTML += "A";
+                        if (count < gameState.tanks.length) {
+                            var tank = gameState.tanks[count];
+                            scoreHTML += "<td>";
+                            
+                            if (tank.alive) {
+                                scoreHTML += "A";
+                            } else {
+                                scoreHTML += "D";
+                            }
+                            
+                            scoreHTML += "</td><td>" + tank.name + "</td><td>" + tank.kills + "</td><td>" + tank.wins + "</td>";
                         } else {
-                            scoreHTML += "D";
+                            scoreHTML = "<td>&nbsp;</td>";
                         }
                         
-                        scoreHTML += "</td><td>" + tank.name + "</td><td>" + tank.kills + "</td><td>" + tank.wins + "</td></tr>";
-                    }
-                    if (scoreboard.html() != scoreHTML) {
-                        scoreboard.html(scoreHTML);
+                        if (scoreboardRows[count].html() != scoreHTML) {
+                            scoreboardRows[count].html(scoreHTML);
+                        }
                     }
                 }
                 
@@ -130,26 +169,40 @@
                 canvas.clearRect(0, 0, config.mapSize.x, config.mapSize.y);
                 
                 if (gameState.ongoingGame) {
-                    canvas.fillStyle = "Orange";
-                    for (tank of gameState.tanks) {
+                    for (var count = 0; count < gameState.tanks.length; count++) {
+                        var tank = gameState.tanks[count];
+                        
                         if (!tank.alive) {
+                            if (count == selectedTank) {
+                                canvas.fillStyle = colors.selectedTank;
+                            } else {
+                                canvas.fillStyle = colors.deadTank;
+                            }
+                            
                             drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
                         }
                     }
                     
-                    canvas.fillStyle = "Red";
+                    canvas.fillStyle = colors.shell;
                     for (shell of gameState.shells) {
                         drawRotatedRect(shell.x - 1, shell.y - 1, 3, 3, shell.heading);
                     }
                     
-                    canvas.fillStyle = "Black";
-                    for (tank of gameState.tanks) {
+                    for (var count = 0; count < gameState.tanks.length; count++) {
+                        var tank = gameState.tanks[count];
+                        
                         if (tank.alive) {
+                            if (count == selectedTank) {
+                                canvas.fillStyle = colors.selectedTank;
+                            } else {
+                                canvas.fillStyle = colors.aliveTank;
+                            }
+                        
                             drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
                         }
                     }
                     
-                    canvas.fillStyle = "Gray";
+                    canvas.fillStyle = colors.wall;
                     for (wall of gameState.walls) {
                         canvas.fillRect(wall.x - wall.width / 2, wall.y - wall.height / 2, wall.width, wall.height);
                     }
