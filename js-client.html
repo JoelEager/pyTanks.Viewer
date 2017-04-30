@@ -137,8 +137,8 @@
                     // Sort the tanks
                     gameState.tanks.sort(function(tank1, tank2) {
                         // lower = first on the list
-                        var weight1 = -1 * tank1.wins;
-                        var weight2 = -1 * tank2.wins;
+                        var weight1 = -1 * tank1.kills;
+                        var weight2 = -1 * tank2.kills;
                         
                         if (tank1.alive) {
                             weight1 -= 100;
