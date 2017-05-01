@@ -42,7 +42,8 @@
                 maxPlayers: 15,                 // Maximum number of connected players
                 serverIP: "localhost",          // Server's IP
                 serverPort: "9042",             // Server's port
-                apiPath: "/pyTanksAPI/viewer"   // API path on the server to connect to
+                apiPath: "/pyTanksAPI/viewer",  // API path on the server to connect to
+                logFPS: true                    // Enable or disable client side FPS logging
             };
             
             // Colors used for rendering the canvas
@@ -61,6 +62,7 @@
             var clientStatus = null;
             var scoreboardRows = [];
             var selectedTank = -1;
+            var framesDrawn = 0;
             
             // Setup and run the viewer
             $(function() {
@@ -88,6 +90,13 @@
                     
                     // Start the doTick clock
                     var ticker = window.setInterval(function(){ doTick(); }, 1000 / config.framesPerSecond);
+                    
+                    if (config.logFPS) {
+                        window.setInterval(function() {
+                            console.log(framesDrawn);
+                            framesDrawn = 0;
+                        }, 1000);
+                    }
                 
                     // Store any incoming gameState updates
                     socket.onmessage = function (event) {
@@ -223,6 +232,10 @@
                     for (wall of gameState.walls) {
                         canvas.fillRect(wall.x - wall.width / 2, wall.y - wall.height / 2, wall.width, wall.height);
                     }
+                }
+                
+                if (config.logFPS) {
+                    framesDrawn += 1;
                 }
             }
             
