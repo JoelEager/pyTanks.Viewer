@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>pyTanks Viewer</title>
+        <style>
+            td {
+                padding: 3px;
+            }
+            
+            tr:hover:not(.header) {
+                color: cadetblue;
+            }
+        </style>
+    </head>
+    <body>
+        <h2 style="margin: 0px;">pyTanks Viewer</h2>
+        <p style="margin-top: 5px;">For more information on pyTanks <a href="https://github.com/JoelEager/pyTanks.Viewer" target="_blank">click here</a>.</p>
+        <div style="text-align: center;">
+            <p id="clientStatus">Connecting...</p>
+            <canvas id="canvas" width="500" height="500" style="display: inline-block; border: 1px solid #d3d3d3; vertical-align: top; margin-bottom: 10px;"></canvas>
+            <div style="display: inline-block; border: 1px solid #d3d3d3;">
+                <table id="scoreboard" style="text-align: left;">
+                    <tr class="header"><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>
+                </table>
+                <div style="margin: 5px;">
+                    A = alive, D = dead. <br />
+                    Hover over a tank above to see it highlighted on the map.
+                </div>
+            </div>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="viewerLogic.js"></script>
+    </body>
+</html>

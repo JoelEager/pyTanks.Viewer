@@ -16,7 +16,7 @@ pyTanks is a project in three modules:
 Base functionality is in place but some of the important stuff is still a work in progress.
 
 #### Usage:
-Just open js-client.html in your favorite browser.
+Just open index.html in your favorite browser.
 
 ---
 (For the other modules see the repos linked at the top of this readme.)
