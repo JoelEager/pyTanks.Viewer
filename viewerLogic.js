@@ -35,7 +35,6 @@ var canvas = null;
 var clientStatus = null;
 var scoreboardRows = [];
 var selectedTank = -1;
-var continueRendering = true;
 var framesDrawn = 0;
 var lastTick = null;
 
