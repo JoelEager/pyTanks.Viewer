@@ -12,7 +12,7 @@ var config = {
     
     maxPlayers: 15,                 // Maximum number of connected players
     
-    serverIP: "localhost",          // Server's IP
+    serverIP: "pytanks.csh.rit.edu",// Server's IP
     serverPort: "9042",             // Server's port
     apiPath: "/pyTanksAPI/viewer",  // API path on the server to connect to
     
