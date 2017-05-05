@@ -39,7 +39,11 @@ var lastTick = null;
 $(function() {
     canvas = $("#canvas")[0].getContext("2d");
     clientStatus = $("#clientStatus");
-    $("#usage").append(ipAndPort);
+    
+    // Append ipAndPort to the usage if this is a non-default server
+    if (ipAndPort != "localhost:9042") {
+        $("#usage").append(ipAndPort);
+    }
     
     // Setup the scoreboard
     var scoreboard = $("#scoreboard");
