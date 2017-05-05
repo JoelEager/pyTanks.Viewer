@@ -11,9 +11,6 @@ var config = {
     shellSpeed: 150,                // Shell speed in pixels per second
     
     maxPlayers: 15,                 // Maximum number of connected players
-    
-    serverIP: "pytanks.csh.rit.edu",// Server's IP
-    serverPort: "9042",             // Server's port
     apiPath: "/pyTanksAPI/viewer",  // API path on the server to connect to
     
     logFPS: false                    // Enable or disable client side FPS logging
@@ -42,6 +39,7 @@ var lastTick = null;
 $(function() {
     canvas = $("#canvas")[0].getContext("2d");
     clientStatus = $("#clientStatus");
+    $("#usage").append(ipAndPort);
     
     // Setup the scoreboard
     var scoreboard = $("#scoreboard");
@@ -56,7 +54,7 @@ $(function() {
     }
     
     // Connect to sever
-    var socket = new WebSocket("ws://" + config.serverIP + ":" + config.serverPort + config.apiPath);
+    var socket = new WebSocket("ws://" + ipAndPort + config.apiPath);
     
     // Finish setup on successful connect
     socket.onopen = function (event) {
