@@ -207,13 +207,13 @@ function renderFrame() {
                     canvas.fillStyle = colors.deadTank;
                 }
                 
-                drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
+                drawRotatedRect(tank.x, tank.y, 10, 10, tank.heading);
             }
         }
         
         canvas.fillStyle = colors.shell;
         for (shell of gameState.shells) {
-            drawRotatedRect(shell.x - 1, shell.y - 1, 3, 3, shell.heading);
+            drawRotatedRect(shell.x, shell.y, 3, 3, shell.heading);
         }
         
         for (var count = 0; count < gameState.tanks.length; count++) {
@@ -226,7 +226,7 @@ function renderFrame() {
                     canvas.fillStyle = colors.aliveTank;
                 }
             
-                drawRotatedRect(tank.x - 5, tank.y - 5, 10, 10, tank.heading);
+                drawRotatedRect(tank.x, tank.y, 10, 10, tank.heading);
             }
         }
         
@@ -238,9 +238,10 @@ function renderFrame() {
 }
 
 // Draws a rotated rectangle with the current fill style
+//  x, y must be the center of the rectangle
 function drawRotatedRect(x, y, width, height, heading) {
     canvas.save();
-    canvas.translate(x + width / 2, y + height / 2);
+    canvas.translate(x, y);
     canvas.rotate(heading);
     // Note: after transforming [0,0] is visually [x,y] so the rect needs to be offset accordingly when drawn
     canvas.fillRect(-width / 2, -height / 2, width, height);
