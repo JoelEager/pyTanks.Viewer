@@ -242,7 +242,7 @@ function renderFrame() {
 function drawRotatedRect(x, y, width, height, heading) {
     canvas.save();
     canvas.translate(x, y);
-    canvas.rotate(heading);
+    canvas.rotate(-heading);    // rotate() is clockwise, pyTanks headings are counter-clockwise
     // Note: after transforming [0,0] is visually [x,y] so the rect needs to be offset accordingly when drawn
     canvas.fillRect(-width / 2, -height / 2, width, height);
     canvas.restore();
