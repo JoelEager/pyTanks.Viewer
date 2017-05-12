@@ -33,10 +33,13 @@ var viewer = {
         wall: "gray"
     },
     
+    // Default info text to show below the scoreboard
+    infoText: "<center>A = alive, D = dead</center>Click on a tank's entry above to toggle highlighting it on the map and displaying info on its AI here.",
+    
     // State variables
     gameState: null,
     gameStateUpdate: null,
-    selectedTank: -1,
+    selectedTank: [-1, ""],
     framesDrawn: 0,
     lastTick: null,
     socket: null,
@@ -46,6 +49,7 @@ var viewer = {
     canvas: null,
     clientStatus: null,
     scoreboardRows: [],
+    tankInfo: null,
 
     // Connect to a new server
     connect: function (ipAndPort) {
@@ -142,11 +146,48 @@ var viewer = {
             return weight1 - weight2;
         });
         
+        // Update selectedTank
+        if (viewer.selectedTank[0] != -1) {
+            var newSelectedTank = [-1, ""];
+            
+            for (var count = 0; count < viewer.gameState.tanks.length; count++) {
+                if (viewer.selectedTank[1] == viewer.gameState.tanks[count].name) {
+                    newSelectedTank[0] = count;
+                    newSelectedTank[1] = viewer.selectedTank[1];
+                    break;
+                }
+            }
+            
+            if (newSelectedTank[0] == -1 || newSelectedTank[0] != viewer.selectedTank[0]) {
+                viewer.scoreboardRows[viewer.selectedTank[0]].css("color", "");
+                viewer.selectedTank = newSelectedTank;
+                
+                if (viewer.selectedTank[0] != -1) {
+                    viewer.scoreboardRows[viewer.selectedTank[0]].css("color", viewer.colors.selectedTank);
+                }
+            }
+        }
+        
         // Update the status
+        var status = "";
         if (viewer.gameState.ongoingGame) {
-            viewer.clientStatus.html("Connected - Game in progress");
+            status = "Connected - Game in progress";
         } else {
-            viewer.clientStatus.html("Connected - Waiting for players. (Feel free to connect a couple more to get a game started.)");
+            status = "Connected - Waiting for players. (Feel free to connect a couple more to get a game started.)";
+        }
+        
+        if (status != viewer.clientStatus.html()) {
+            viewer.clientStatus.html(status);
+        }
+        
+        // Show the info
+        var info = viewer.infoText;
+        if (viewer.selectedTank[0] != -1) {
+            info = "<b><center>Info on this AI:</center></b>" + viewer.gameState.tanks[viewer.selectedTank[0]].info;
+        }
+        
+        if (info != viewer.tankInfo.html()) {
+            viewer.tankInfo.html(info);
         }
         
         // Update any out of date scoreboard entries
@@ -200,7 +241,7 @@ var viewer = {
                 var tank = viewer.gameState.tanks[count];
                 
                 if (!tank.alive) {
-                    if (count == viewer.selectedTank) {
+                    if (count == viewer.selectedTank[0]) {
                         viewer.canvas.fillStyle = viewer.colors.selectedTank;
                     } else {
                         viewer.canvas.fillStyle = viewer.colors.deadTank;
@@ -219,7 +260,7 @@ var viewer = {
                 var tank = viewer.gameState.tanks[count];
                 
                 if (tank.alive) {
-                    if (count == viewer.selectedTank) {
+                    if (count == viewer.selectedTank[0]) {
                         viewer.canvas.fillStyle = viewer.colors.selectedTank;
                     } else {
                         viewer.canvas.fillStyle = viewer.colors.aliveTank;
@@ -245,6 +286,23 @@ var viewer = {
         // Note: after transforming [0,0] is visually [x,y] so the rect needs to be offset accordingly when drawn
         viewer.canvas.fillRect(-width / 2, -height / 2, width, height);
         viewer.canvas.restore();
+    },
+    
+    // onclick handler for the scoreboard rows
+    selectTank: function (id) {
+        var oldId = viewer.selectedTank[0];
+        
+        // Unmark the old tank
+        if (viewer.selectedTank[0] != -1) {
+            viewer.scoreboardRows[viewer.selectedTank[0]].css("color", "");
+            viewer.selectedTank = [-1, ""];
+        }
+        
+        // Mark the new one
+        if (oldId != id && name < viewer.gameState.tanks.length) {
+            viewer.scoreboardRows[id].css("color", viewer.colors.selectedTank);
+            viewer.selectedTank = [id, viewer.gameState.tanks[id].name];
+        }
     }
 };
 
@@ -252,24 +310,19 @@ var viewer = {
 $(function() {
     var htmlUI = `
     <style>
-    td {
-        padding: 3px;
-    }
-
-    tr:hover:not(.header) {
-        color: cadetblue;
-    }
+        td {
+            padding: 3px;
+        }
     </style>
     <div style="text-align: center;">
     <p id="clientStatus">Connecting...</p>
     <canvas id="canvas" width="` + viewer.config.mapSize.x + `" height="` + viewer.config.mapSize.y + `" style="display: inline-block; border: 1px solid #d3d3d3; vertical-align: top; margin-bottom: 10px;"></canvas>
-    <div style="display: inline-block; border: 1px solid #d3d3d3;">
-        <table id="scoreboard" style="text-align: left;">
-            <tr class="header"><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>
+    <div style="display: inline-block; border: 1px solid #d3d3d3; width: 400px; text-align: left;">
+        <table id="scoreboard">
+            <tr><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>
         </table>
-        <div style="margin: 5px;">
-            A = alive, D = dead. <br />
-            Hover over a tank above to see it highlighted on the map.
+        <div id="tankInfo" style="margin: 5px;">
+            ` + viewer.infoText + `
         </div>
     </div>
     </div>`;
@@ -279,13 +332,14 @@ $(function() {
     // Fill jQuery variables
     viewer.canvas = $("#canvas")[0].getContext("2d");
     viewer.clientStatus = $("#clientStatus");
+    viewer.tankInfo = $("#tankInfo");
 
     // Set up the scoreboard
     var scoreboard = $("#scoreboard");
     for (var count = 0; count < viewer.config.maxPlayers; count++) {
         var aRow = $(
             "<tr id='score-" + count + "' " +
-            "onmouseenter='viewer.selectedTank = " + count + ";' onmouseleave='viewer.selectedTank = -1;'>" + 
+            "onclick='viewer.selectTank(" + count + ");'>" + 
             "<td>&nbsp;</td></tr>");
         
         scoreboard.append(aRow);
