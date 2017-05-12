@@ -1,36 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>pyTanks Viewer</title>
-        <style>
-            td {
-                padding: 3px;
-            }
-            
-            tr:hover:not(.header) {
-                color: cadetblue;
-            }
-        </style>
+        <title>pyTanks Localhost Viewer</title>
     </head>
     <body>
-        <h2 style="margin: 0px;">pyTanks Beta</h2>
-        <p style="margin-top: 5px;">Try your hand at making an AI by cloning the example <a href="https://github.com/JoelEager/pyTanks.Player" target="_blank">here</a>.</p>
-        <div style="text-align: center;">
-            <p id="clientStatus">Connecting...</p>
-            <canvas id="canvas" width="500" height="500" style="display: inline-block; border: 1px solid #d3d3d3; vertical-align: top; margin-bottom: 10px;"></canvas>
-            <div style="display: inline-block; border: 1px solid #d3d3d3;">
-                <table id="scoreboard" style="text-align: left;">
-                    <tr class="header"><td></td><td>Tank</td><td>Kills this round</td><td>Rounds won</td></tr>
-                </table>
-                <div style="margin: 5px;">
-                    A = alive, D = dead. <br />
-                    Hover over a tank above to see it highlighted on the map.
-                </div>
-            </div>
-            <p style="margin-top: 5px;">Use this command to connect your player to this server: <pre id="usage">python start.py </pre></p>
-        </div>
+        <h2 style="margin: 0px;">pyTanks Localhost Viewer</h2>
+        <p style="margin-top: 5px;"><a href="https://github.com/JoelEager/pyTanks.Player" target="_blank">Click here</a> for docs on the player.</p>
+        <span id="viewer"></span>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-        <script src="serverIP.js"></script>
         <script src="viewerLogic.js"></script>
+        <script>
+            $(function() {
+                viewer.connect("localhost:9042");
+            });
+        </script>
     </body>
 </html>
