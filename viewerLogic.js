@@ -338,7 +338,7 @@ $(function() {
     var scoreboard = $("#scoreboard");
     for (var count = 0; count < viewer.config.maxPlayers; count++) {
         var aRow = $(
-            "<tr id='score-" + count + "' " +
+            "<tr id='score-" + count + "' style='cursor: pointer;' " +
             "onclick='viewer.selectTank(" + count + ");'>" + 
             "<td>&nbsp;</td></tr>");
         
