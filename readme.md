@@ -8,13 +8,18 @@ pyTanks is a project in three modules:
 - [Player](https://github.com/JoelEager/pyTanks.Player) - A Python AI that connects to the server and plays the game of tanks.
 - **Viewer** - A JavaScript/HTML UI for humans to view the ongoing battle.
 
-**Note: pyTanks is currently in beta testing. Please try your hand at making an AI and offer feedback. However, the API and game mechanics are subject to change.**
+**Note: pyTanks is currently in beta testing. Please feel free to try your hand at making an AI and offer feedback. However, the API and game mechanics are subject to change.**
+
+### Writing players in other languages:
+All components of pyTanks communicate using JSON strings sent over a websockets connection. The Player API has intentionally been kept simple to make it easy to implement it in other languages. Matthew Seaman has released an open source Swift implementation of the pyTanks Player so if Swift is your thing you can [give it a try](https://github.com/matthewseaman/pyTanks.SwiftPlayer).
 
 ## Viewer
-Base functionality is in place but some of the features are unpolished.
+The current state of the viewer is "functional but ugly". The features are fairly close to complete but a UI rework is planned.
+
+As it stands now it works well as a debugging tool so feel free to clone it and use it locally for that.
 
 #### Usage:
-Just open index.html in your favorite browser.
+Just open index.html in your favorite browser. It will automatically try to connect to localhost:9042 (which is the default server port). To have it connect to a different IP and/or port just modify the `viewer.connect()` call in `index.html`.
 
 ---
 (For the other modules see the repos linked at the top of this readme.)
