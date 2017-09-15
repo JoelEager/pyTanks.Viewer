@@ -4,6 +4,8 @@
     
     To connect to a server call viewer.connect("ip:port") after jQuery has loaded
     (This will also close any existing connection)
+    
+    Requires jQuery 3.x
 */
 
 // The viewer module
