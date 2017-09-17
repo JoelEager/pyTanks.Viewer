@@ -15,7 +15,7 @@ server and plays the game of tanks.
 The current state of the viewer is "functional but ugly". The features are fairly complete but 
 the HTML file in this repo is pretty bare bones.
 
-#### Usage:
+### Usage
 This repo is set up to be used as a local debugging tool for AI development. Just open 
 `index.html` in your favorite browser. It will automatically try to connect to `localhost:9042` 
 (which is the default server port). To have it connect to a different IP and/or port just modify 
